@@ -1,1 +1,0 @@
-# monospec-api
