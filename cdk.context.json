@@ -1,0 +1,12 @@
+{
+  "roman": {
+    "environment": "roman",
+    "account": "536697255890",
+    "region": "eu-central-1"
+  },
+  "prod": {
+    "environment": "prod",
+    "account": "688567283420",
+    "region": "eu-central-1"
+  }
+}
