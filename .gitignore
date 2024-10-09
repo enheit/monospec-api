@@ -15,6 +15,9 @@
 go.work
 go.work.sum
 
+# Golang build lambda files
+bootstrap
+
 # Environment file
 .env
 
