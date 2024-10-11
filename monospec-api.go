@@ -21,7 +21,13 @@ func NewMonospecApiStack(scope constructs.Construct, id string, props *MonospecA
 
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
+	vpc := stacks.NewVpcNestedStack(stack, "Vpc")
+
 	apiGateWay := stacks.NewApiGatewayNestedStack(stack, "ApiGateway")
+
+	stacks.NewRdsNestedStack(stack, "Rds", &stacks.RdsNestedStackProps{
+		Vpc: vpc.DefaultVpc,
+	})
 
 	stacks.NewLambdaNestedStack(stack, "Lambda", &stacks.LambdaNestedStackProps{
 		HttpApiId:  apiGateWay.HttpApi.HttpApiId(),
