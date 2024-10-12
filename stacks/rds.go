@@ -8,10 +8,6 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-type Test struct {
-	Prop string
-}
-
 type RdsNestedStack struct {
 	awscdk.NestedStack
 	Rds awsrds.DatabaseInstance

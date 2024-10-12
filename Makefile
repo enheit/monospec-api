@@ -1,8 +1,13 @@
 # Note: This file was copied from ChatGPT @ Roman
+
 # Variables
 GOARCH=arm64
 GOOS=linux
 LAMBDA_DIR=./lambdas
+
+# Migration database URL
+MIGRATE_BIN=/usr/bin/migrate
+MIGRATE_DB=postgres://postgres:9HxW.CGwtuo%5E=,mOYSKD%5EwG2a==oNx@monospecapistack-rdsnestedstackrdsnest-rds34d05673-b5mbbyvdtfuv.cfiwiiwq0xla.eu-central-1.rds.amazonaws.com:5432/monospec
 
 # Lambda functions
 LAMBDA_FUNCTIONS = \
@@ -10,7 +15,7 @@ LAMBDA_FUNCTIONS = \
 	get-user-appointments
 
 # Targets
-.PHONY: all build clean
+.PHONY: all build clean migrate
 
 all: build
 
@@ -29,4 +34,16 @@ clean:
 	for func in $(LAMBDA_FUNCTIONS); do \
 		rm -f $(LAMBDA_DIR)/$$func/bootstrap; \
 	done
+
+# Run migrations
+migrate:
+	@echo "Running migrations..."
+	$(MIGRATE_BIN) -path ./postgres/migrations -database $(MIGRATE_DB) up
+
+rollback:
+	@echo "Rolling back migrations with argument: $(arg)"
+	@$(MIGRATE_BIN) -path ./postgres/migrations -database $(MIGRATE_DB) down $(rc)
+
+# rc = Rollback Count
+rc := 1
 

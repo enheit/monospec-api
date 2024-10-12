@@ -7,7 +7,7 @@ import (
 )
 
 type WorkingDayRepo struct {
-	Db *pgxpool.Pool
+	Pool *pgxpool.Pool
 }
 
 func (r *WorkingDayRepo) GetWorkingDay(workingDayId string) (*types.WorkingDay, error) {
