@@ -30,7 +30,7 @@ func NewVpcNestedStack(scope constructs.Construct, id string) *VpcNestedStack {
 	// 		},
 	//      {
 	//        Name:       jsii.String("PrivateSubnet"),
-	//        SubnetType: awsec2.SubnetType_PRIVATE_WITH_NAT,
+	//        SubnetType: awsec2.,
 	//        CidrMask:   jsii.Number(24), // 10.0.1.0/24
 	//      },
 	// 	},
