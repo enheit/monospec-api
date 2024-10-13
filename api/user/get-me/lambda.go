@@ -1,5 +1,0 @@
-package getme
-
-func getMeLambda() {
-
-}

@@ -3,16 +3,10 @@
 # Variables
 GOARCH=arm64
 GOOS=linux
-LAMBDA_DIR=./lambdas
 
 # Migration database URL
 MIGRATE_BIN=/usr/bin/migrate
 MIGRATE_DB=postgres://postgres:9HxW.CGwtuo%5E=,mOYSKD%5EwG2a==oNx@monospecapistack-rdsnestedstackrdsnest-rds34d05673-b5mbbyvdtfuv.cfiwiiwq0xla.eu-central-1.rds.amazonaws.com:5432/monospec
-
-# Lambda functions
-LAMBDA_FUNCTIONS = \
-	get-me \
-	get-user-appointments
 
 # Targets
 .PHONY: all build clean migrate
@@ -20,20 +14,20 @@ LAMBDA_FUNCTIONS = \
 all: build
 
 # Build all Lambda functions
-build: $(LAMBDA_FUNCTIONS)
-
-# Build each Lambda function
-$(LAMBDA_FUNCTIONS):
-	@echo "Building $@..."
-	GOARCH=$(GOARCH) GOOS=$(GOOS) go build -o $(LAMBDA_DIR)/$@/bootstrap $(LAMBDA_DIR)/$@/$@.go && \
-	chmod +x $(LAMBDA_DIR)/$@/bootstrap
+build:
+	@echo "Building all Lambda functions..."
+	@find . -type f -name '*-lambda.go' | while read file; do \
+		func_name=$$(basename $${file%-lambda.go}); \
+		func_dir=$$(dirname "$$file"); \
+		echo "Building $$func_name..."; \
+		GOARCH=$(GOARCH) GOOS=$(GOOS) go build -o "$$func_dir/bootstrap" "$$file" && \
+		chmod +x "$$func_dir/bootstrap"; \
+	done
 
 # Clean up built binaries
 clean:
 	@echo "Cleaning up..."
-	for func in $(LAMBDA_FUNCTIONS); do \
-		rm -f $(LAMBDA_DIR)/$$func/bootstrap; \
-	done
+	@find . -name 'bootstrap' -exec rm -f {} +
 
 # Run migrations
 migrate:
@@ -46,4 +40,3 @@ rollback:
 
 # rc = Rollback Count
 rc := 1
-
