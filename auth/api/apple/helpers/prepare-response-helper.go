@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
-	"monospec-api/api/auth/enter/types"
+	"monospec-api/api/auth/apple/types"
 )
 
 func PrepareResponseBody(user *types.User) (*string, error) {

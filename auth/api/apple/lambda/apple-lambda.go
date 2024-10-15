@@ -3,15 +3,15 @@ package main
 import (
 	"context"
 
-	"monospec-api/api/auth/enter/controller"
+	"monospec-api/auth/api/apple/controller"
 	"monospec-api/shared/helpers"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func Enter(context context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	controller := controller.EnterController{}
+func Apple(context context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	controller := controller.AppleController{}
 
 	rawResponseBody, err := controller.Execute(request.Body)
 
@@ -27,5 +27,5 @@ func Enter(context context.Context, request events.APIGatewayProxyRequest) (*eve
 }
 
 func main() {
-	lambda.Start(Enter)
+	lambda.Start(Apple)
 }

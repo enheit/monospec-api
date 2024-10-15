@@ -1,20 +1,20 @@
 package controller
 
 import (
-	"monospec-api/api/auth/enter/enums"
-	"monospec-api/api/auth/enter/helpers"
-	"monospec-api/api/auth/enter/services"
-	"monospec-api/api/auth/enter/use-case"
-	"monospec-api/api/auth/enter/validators"
+	"monospec-api/api/auth/apple/enums"
+	"monospec-api/api/auth/apple/helpers"
+	"monospec-api/api/auth/apple/services"
+	"monospec-api/api/auth/apple/use-case"
+	"monospec-api/api/auth/apple/validators"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 )
 
-type EnterController struct {
+type AppleController struct {
 }
 
-func (c *EnterController) Execute(rawRequestBody string) (*string, error) {
+func (c *AppleController) Execute(rawRequestBody string) (*string, error) {
 	requestBody, err := validators.ValidateRequestBody(rawRequestBody)
 
 	if err != nil {
@@ -26,8 +26,8 @@ func (c *EnterController) Execute(rawRequestBody string) (*string, error) {
 		ClientId:      os.Getenv(enums.LambdaEnvsUserPoolClientId),
 	}
 
-	useCase := &usecase.EnterUseCase{
-		CognitoAuthService: cognitoAuthService,
+	useCase := &usecase.AppleUseCase{
+		TokenService: cognitoAuthService,
 	}
 
 	user, err := useCase.Enter(requestBody.Token)

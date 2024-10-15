@@ -7,8 +7,8 @@ import (
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 
-	enter "monospec-api/api/auth/enter/lambda-config"
-	logout "monospec-api/api/auth/logout/lambda-config"
+	apple "monospec-api/auth/api/apple/lambda-config"
+	logout "monospec-api/auth/api/logout/lambda-config"
 )
 
 type AuthLambdasNestedStack struct {
@@ -33,7 +33,7 @@ func NewAuthLambdasNestedStack(scope constructs.Construct, id string, props *Aut
 		ApiEndpoint: props.HttpApiUrl,
 	})
 
-	enter.NewEnterLambda(nestedStack, "Enter", &enter.EnterLambdaProps{
+	apple.NewAppleLambda(nestedStack, "Enter", &apple.AppleLambdaProps{
 		HttpApi: httpApi,
 	})
 

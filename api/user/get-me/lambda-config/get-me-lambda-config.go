@@ -2,6 +2,7 @@ package lambdaconfig
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2authorizers"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2integrations"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
@@ -13,7 +14,8 @@ type GetMeLambda struct {
 }
 
 type GetMeLambdaProps struct {
-	HttpApi awsapigatewayv2.IHttpApi
+	HttpApi                 awsapigatewayv2.IHttpApi
+	HeadersLambdaAuthorizer *awsapigatewayv2authorizers.HttpLambdaAuthorizer
 }
 
 func NewGetMeLambda(scope constructs.Construct, id string, props *GetMeLambdaProps) *GetMeLambda {
@@ -28,6 +30,7 @@ func NewGetMeLambda(scope constructs.Construct, id string, props *GetMeLambdaPro
 		HttpApi:     props.HttpApi,
 		RouteKey:    awsapigatewayv2.HttpRouteKey_With(jsii.String("/me"), awsapigatewayv2.HttpMethod_GET),
 		Integration: awsapigatewayv2integrations.NewHttpLambdaIntegration(jsii.String(id+"Integration"), lambda, nil),
+		Authorizer:  *props.HeadersLambdaAuthorizer,
 	})
 
 	return &GetMeLambda{
