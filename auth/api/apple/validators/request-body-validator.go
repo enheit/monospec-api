@@ -2,7 +2,7 @@ package validators
 
 import (
 	"encoding/json"
-	"monospec-api/api/auth/apple/types"
+	"monospec-api/auth/api/apple/types"
 	"monospec-api/shared/problems"
 
 	"github.com/go-playground/validator/v10"

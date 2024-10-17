@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 	"monospec-api/stacks"
@@ -21,17 +20,15 @@ func NewMonospecApiStack(scope constructs.Construct, id string, props *MonospecA
 
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// vpc := stacks.NewVpcNestedStack(stack, "Vpc")
+	vpc := stacks.NewVpcNestedStack(stack, "Vpc")
 
 	apiGateWay := stacks.NewApiGatewayNestedStack(stack, "ApiGateway")
 
-	// stacks.NewRdsNestedStack(stack, "Rds", &stacks.RdsNestedStackProps{
-	// 	Vpc: vpc.DefaultVpc,
-	// })
+	stacks.NewRdsNestedStack(stack, "Rds", &stacks.RdsNestedStackProps{
+		Vpc: vpc.DefaultVpc,
+	})
 
-	cognito := stacks.NewCognitoNestedStack(stack, "Cognito", nil)
-
-	stacks.NewLambdasNestedStack(stack, "Lambda", &stacks.LambdasNestedStackProps{
+	stacks.NewLambdasNestedStack(stack, "Lambdas", &stacks.LambdasNestedStackProps{
 		HttpApiId:  apiGateWay.HttpApi.HttpApiId(),
 		HttpApiUrl: apiGateWay.HttpApi.ApiEndpoint(),
 	})

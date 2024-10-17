@@ -16,7 +16,7 @@ func NewVerifyAccessTokenLambda(scope constructs.Construct, id string) *VerifyAc
 		Architecture: awslambda.Architecture_ARM_64(),
 		Code:         awslambda.AssetCode_FromAsset(jsii.String("./auth/middlewares/verify-access-token/lambda"), nil),
 		Handler:      jsii.String("bootstrap"),
-		Environment:  &map[string]*string{},
+		// Environment:  &map[string]*string{},
 	})
 
 	return &VerifyAccessTokenLambda{

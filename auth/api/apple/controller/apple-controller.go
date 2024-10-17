@@ -1,46 +1,74 @@
 package controller
 
 import (
-	"monospec-api/api/auth/apple/enums"
-	"monospec-api/api/auth/apple/helpers"
-	"monospec-api/api/auth/apple/services"
-	"monospec-api/api/auth/apple/use-case"
-	"monospec-api/api/auth/apple/validators"
+	"context"
+	"encoding/json"
+	"monospec-api/auth/api/apple/repos"
+	"monospec-api/auth/api/apple/services"
+	"monospec-api/auth/api/apple/types"
+	"monospec-api/auth/api/apple/use-case"
+	"monospec-api/auth/api/apple/validators"
+	authServices "monospec-api/auth/services"
+	"monospec-api/shared/enums"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type AppleController struct {
+	context context.Context
+	dbPool  *pgxpool.Pool
+}
+
+func New(dbPool *pgxpool.Pool, context context.Context) *AppleController {
+	return &AppleController{
+		dbPool:  dbPool,
+		context: context,
+	}
 }
 
 func (c *AppleController) Execute(rawRequestBody string) (*string, error) {
+	println("Request body is received")
 	requestBody, err := validators.ValidateRequestBody(rawRequestBody)
+	println("Request body is validated")
 
 	if err != nil {
 		return nil, err
 	}
 
-	cognitoAuthService := &services.CognitoAuthService{
-		CognitoClient: cognitoidentityprovider.New(cognitoidentityprovider.Options{}),
-		ClientId:      os.Getenv(enums.LambdaEnvsUserPoolClientId),
-	}
+	userRepo := repos.NewUserRepo(c.dbPool, c.context)
+	tokenService := authServices.NewTokenService(os.Getenv(enums.JWTPrivateKey))
+	appleIdentityTokenService := services.NewAppleIdentityTokenService()
 
 	useCase := &usecase.AppleUseCase{
-		TokenService: cognitoAuthService,
+		TokenService:              tokenService,
+		AppleIdentityTokenService: appleIdentityTokenService,
+		UserRepo:                  userRepo,
 	}
 
-	user, err := useCase.Enter(requestBody.Token)
+	useCasePayload, err := useCase.Enter(requestBody.IdentityToken, requestBody.FirstName)
 
 	if err != nil {
 		return nil, err
 	}
 
-	rawResponseBody, err := helpers.PrepareResponseBody(user)
+	responseBody := &types.ResponseBody{
+		User: types.UserResponse{
+			Id:    useCasePayload.User.Id,
+			Name:  useCasePayload.User.Name,
+			Email: useCasePayload.User.Email,
+		},
+		AccessToken:  useCasePayload.AccessToken,
+		RefreshToken: useCasePayload.RefreshToken,
+	}
+
+	rawResponseBodyBytes, err := json.Marshal(responseBody)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return rawResponseBody, nil
+	rawResponseBody := string(rawResponseBodyBytes)
+
+	return &rawResponseBody, nil
 }

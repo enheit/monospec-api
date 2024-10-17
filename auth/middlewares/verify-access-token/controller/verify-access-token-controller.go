@@ -9,6 +9,10 @@ import (
 type VerifyAccessTokenController struct {
 }
 
+func New() *VerifyAccessTokenController {
+	return &VerifyAccessTokenController{}
+}
+
 func (c *VerifyAccessTokenController) Execute(rawAccessToken string) (*types.AccessToken, error) {
 	tokenService := services.TokenService{}
 

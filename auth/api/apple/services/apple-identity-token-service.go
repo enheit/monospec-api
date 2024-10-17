@@ -1,8 +1,11 @@
 package services
 
 import (
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"monospec-api/auth/api/apple/types"
 	"monospec-api/shared/problems"
 	"net/http"
@@ -14,7 +17,15 @@ import (
 type AppleIdentityTokenService struct {
 }
 
+func NewAppleIdentityTokenService() *AppleIdentityTokenService {
+	return &AppleIdentityTokenService{}
+}
+
 func (s *AppleIdentityTokenService) VerifyIdentityToken(rawIdentityToken string, publicKeys *types.ApplePublicKeys) (*types.AppleIdentityToken, error) {
+	println("rawIdentityToken: ", rawIdentityToken)
+
+	// HERE
+
 	token, err := jwt.ParseWithClaims(rawIdentityToken, &types.AppleIdentityTokenCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, unexpectedSigningMethod(token.Header["alg"].(string))
@@ -22,12 +33,24 @@ func (s *AppleIdentityTokenService) VerifyIdentityToken(rawIdentityToken string,
 
 		for _, key := range publicKeys.Keys {
 			if key.Kid == token.Header["kid"] {
-				return key.N, nil
+				parsedKey, err := parsePublicKey(key)
+
+				if err != nil {
+					return nil, err
+				}
+
+				return parsedKey, nil
 			}
 		}
 
 		return nil, kidNotFound(token.Header["kid"].(string))
 	})
+
+	println("token: ", token)
+
+	if err != nil {
+		return nil, err
+	}
 
 	claims, ok := token.Claims.(*types.AppleIdentityTokenCustomClaims)
 
@@ -52,7 +75,7 @@ func (s *AppleIdentityTokenService) VerifyIdentityToken(rawIdentityToken string,
 	}
 
 	if issuer != "https://appleid.apple.com" {
-		return nil, invalidIssuer(issuer)
+		return nil, NewInvalidIssuer(issuer)
 	}
 
 	audience, err := token.Claims.GetAudience()
@@ -99,6 +122,27 @@ func (s *AppleIdentityTokenService) VerifyIdentityToken(rawIdentityToken string,
 	return appleIdentityToken, nil
 }
 
+func parsePublicKey(applePublicKey types.ApplePublicKey) (*rsa.PublicKey, error) {
+	nBytes, err := base64.RawURLEncoding.DecodeString(applePublicKey.N)
+
+	if err != nil {
+		return nil, err
+	}
+
+	eBytes, err := base64.RawURLEncoding.DecodeString(applePublicKey.E)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pubKey := &rsa.PublicKey{
+		N: new(big.Int).SetBytes(nBytes),
+		E: int(new(big.Int).SetBytes(eBytes).Int64()),
+	}
+
+	return pubKey, nil
+}
+
 func (s *AppleIdentityTokenService) GetPublicKeys() (*types.ApplePublicKeys, error) {
 	response, err := http.Get("https://appleid.apple.com/auth/keys")
 
@@ -131,7 +175,7 @@ func tokenExpired() error {
 
 	problem := problems.Problem{
 		Id:             "d3c9f5b8-3d9f-4c7f-8d9f-9d9f9d9f9d9f",
-		Message:        "Failed to verify apple identity token",
+		Message:        description, // "Failed to verify apple identity token",
 		Description:    &description,
 		HttpStatusCode: 401,
 	}
@@ -144,7 +188,7 @@ func invalidAudience(audience string) error {
 
 	problem := problems.Problem{
 		Id:             "c35470ea-6aea-4ae1-93e4-503d1cae88f8",
-		Message:        "Failed to verify apple identity token",
+		Message:        originalErrorMessage, // "Failed to verify apple identity token",
 		Description:    &originalErrorMessage,
 		HttpStatusCode: 401,
 	}
@@ -152,25 +196,46 @@ func invalidAudience(audience string) error {
 	return problem
 }
 
-func invalidIssuer(issuer string) error {
-	originalErrorMessage := fmt.Sprintf("Unexpected issuer: %s", issuer)
+type InvalidIssuer struct {
+	problem problems.Problem
+}
+
+func (e *InvalidIssuer) Error() string {
+	return e.problem.Message
+}
+
+func NewInvalidIssuer(issuer string) *InvalidIssuer {
+	description := fmt.Sprintf("Unexpected issuer: %s", issuer)
 
 	problem := problems.Problem{
 		Id:             "c746ec2e-ff93-4b1e-a6fc-046e9daa7832",
-		Message:        "Failed to verify apple identity token",
-		Description:    &originalErrorMessage,
+		Message:        description, // "Failed to verify apple identity token",
+		Description:    &description,
 		HttpStatusCode: 401,
 	}
 
-	return problem
+	return &InvalidIssuer{problem: problem}
 }
+
+// func invalidIssuer(issuer string) error {
+// 	originalErrorMessage := fmt.Sprintf("Unexpected issuer: %s", issuer)
+//
+// 	problem := problems.Problem{
+// 		Id:             "c746ec2e-ff93-4b1e-a6fc-046e9daa7832",
+// 		Message:        "Failed to verify apple identity token",
+// 		Description:    &originalErrorMessage,
+// 		HttpStatusCode: 401,
+// 	}
+//
+// 	return problem
+// }
 
 func unexpectedSigningMethod(alg string) error {
 	description := fmt.Sprintf("Unexpected signing method: %v", alg)
 
 	problem := problems.Problem{
 		Id:             "8ab2be7c-3e8c-48cd-a670-d8f725ebe5c3",
-		Message:        "Failed to verify apple identity token",
+		Message:        description, // "Failed to verify apple identity token",
 		Description:    &description,
 		HttpStatusCode: 401,
 	}
@@ -183,7 +248,7 @@ func kidNotFound(kid string) error {
 
 	problem := problems.Problem{
 		Id:             "ccf6182c-54fe-4608-8f14-9b400cee6f15",
-		Message:        "Failed to verify apple identity token",
+		Message:        originalErrorMessage, // "Failed to verify apple identity token",
 		Description:    &originalErrorMessage,
 		HttpStatusCode: 401,
 	}
@@ -196,7 +261,7 @@ func invalidAppleIdentityToken() error {
 
 	problem := problems.Problem{
 		Id:             "4ac758ae-eb73-426e-ad55-4440216c203e",
-		Message:        "Failed to verify apple identity token",
+		Message:        description, // "Failed to verify apple identity token",
 		Description:    &description,
 		HttpStatusCode: 401,
 	}

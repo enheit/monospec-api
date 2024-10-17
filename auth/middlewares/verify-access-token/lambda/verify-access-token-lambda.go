@@ -14,7 +14,7 @@ import (
 func VerifyAccessToken(context context.Context, request events.APIGatewayCustomAuthorizerRequest) (*events.APIGatewayCustomAuthorizerResponse, error) {
 	rawAccessToken := request.AuthorizationToken
 
-	controller := controller.VerifyAccessTokenController{}
+	controller := controller.New()
 
 	accessToken, err := controller.Execute(rawAccessToken)
 

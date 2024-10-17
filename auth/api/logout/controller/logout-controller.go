@@ -1,12 +1,16 @@
 package controller
 
-import usecase "monospec-api/api/auth/logout/use-case"
+import "monospec-api/auth/api/logout/use-case"
 
 type LogoutController struct {
 }
 
+func New() *LogoutController {
+	return &LogoutController{}
+}
+
 func (c *LogoutController) Execute() {
-	useCase := &usecase.LogoutUseCase{}
+	useCase := usecase.New()
 
 	useCase.Logout()
 }

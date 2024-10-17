@@ -26,14 +26,14 @@ type AuthLambdasNestedStackProps struct {
 }
 
 func NewAuthLambdasNestedStack(scope constructs.Construct, id string, props *AuthLambdasNestedStackProps) *AuthLambdasNestedStack {
-	nestedStack := awscdk.NewNestedStack(scope, jsii.String(id), nil)
+	nestedStack := awscdk.NewNestedStack(scope, jsii.String(id), &props.NestedStackProps)
 
 	httpApi := awsapigatewayv2.HttpApi_FromHttpApiAttributes(nestedStack, jsii.String("HttpApi"), &awsapigatewayv2.HttpApiAttributes{
 		HttpApiId:   props.HttpApiId,
 		ApiEndpoint: props.HttpApiUrl,
 	})
 
-	apple.NewAppleLambda(nestedStack, "Enter", &apple.AppleLambdaProps{
+	apple.NewAppleLambda(nestedStack, "AppleEnter", &apple.AppleLambdaProps{
 		HttpApi: httpApi,
 	})
 

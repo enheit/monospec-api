@@ -45,10 +45,12 @@ func (t *TokenService) CreateAccessToken(userId string) (*string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	rawAccessToken, err := token.SignedString(t.PrivateKey)
+	rawAccessToken, err := token.SignedString([]byte(t.PrivateKey))
 
 	if err != nil {
 		originalErrorMessage := err.Error()
+
+		println("originalErrorMessage: ", originalErrorMessage)
 
 		problem := problems.Problem{
 			Id:             "bb563e4e-e2eb-420b-8293-804de8171171",
@@ -78,10 +80,12 @@ func (t *TokenService) CreateRefreshToken(userId string) (*string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	rawRefreshToken, err := token.SignedString(t.PrivateKey)
+	rawRefreshToken, err := token.SignedString([]byte(t.PrivateKey))
 
 	if err != nil {
 		originalErrorMessage := err.Error()
+
+		println("originalErrorMessage2: ", originalErrorMessage)
 
 		problem := problems.Problem{
 			Id:             "0bbb3cbf-84de-4ad0-b153-2ff74f111e12",

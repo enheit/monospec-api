@@ -20,7 +20,7 @@ func NewLougoutLambda(scope constructs.Construct, id string, props *LogoutLambda
 	lambda := awslambda.NewFunction(scope, jsii.String(id), &awslambda.FunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
 		Architecture: awslambda.Architecture_ARM_64(),
-		Code:         awslambda.AssetCode_FromAsset(jsii.String("./api/auth/logout/lambda"), nil),
+		Code:         awslambda.AssetCode_FromAsset(jsii.String("./auth/api/logout/lambda"), nil),
 		Handler:      jsii.String("bootstrap"),
 	})
 

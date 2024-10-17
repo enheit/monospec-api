@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-
-	"monospec-api/api/auth/logout/controller"
+	"monospec-api/auth/api/logout/controller"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func Logout(context context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	controller := controller.LogoutController{}
+	controller := controller.New()
 
 	controller.Execute()
 
