@@ -1,0 +1,43 @@
+CREATE TABLE IF NOT EXISTS specialists (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  avatar VARCHAR(255),
+  nickname VARCHAR(255) NOT NULL UNIQUE,
+
+  bio VARCHAR(128),
+
+  average_rating DECIMAL(2, 1) NOT NULL DEFAULT 0,
+  appointments_number INT NOT NULL DEFAULT 0,
+  reviews_number INT NOT NULL DEFAULT 0,
+
+  verified BOOLEAN NOT NULL DEFAULT FALSE,
+  verified_at TIMESTAMP WITH TIME ZONE,
+
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE IF NOT EXISTS service_groups (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  specialist_id BIGINT NOT NULL REFERENCES specialists(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE IF NOT EXISTS services (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  price DECIMAL(10, 2) NOT NULL,
+  duration INT NOT NULL,
+  specialist_id BIGINT NOT NULL REFERENCES specialists(id) ON DELETE CASCADE,
+  service_group_id BIGINT NOT NULL REFERENCES service_groups(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Create indeces
+CREATE UNIQUE INDEX idx_specialists_nickname_deleted ON specialists(nickname, deleted_at);

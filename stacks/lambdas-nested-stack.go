@@ -49,6 +49,12 @@ func NewLambdasNestedStack(scope constructs.Construct, id string, props *Lambdas
 		HttpApiUrl: props.HttpApiUrl,
 	})
 
+	lambdas.NewSpecialistLambdasNestedStack(nestedStack, "SpecialistLambdas", &lambdas.SpecialistLambdasNestedStackProps{
+		HttpApiId:               props.HttpApiId,
+		HttpApiUrl:              props.HttpApiUrl,
+		HeadersLambdaAuthorizer: &headersLambdaAuthorizer,
+	})
+
 	return &LambdasNestedStack{
 		NestedStack: nestedStack,
 	}
